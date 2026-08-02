@@ -139,7 +139,7 @@ The predicted class is converted to the required one-hot submission row. Process
 The [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) pipeline retains the normalized CLIP representation above but avoids recomputing embeddings for repeated objects. Each object is assigned a fixed-size SHA-256 key that includes its modality,
 
 $$
-h(o)=\operatorname{SHA256}(\operatorname{modality}(o)\,\Vert\,o),
+h(o)=\mathrm{SHA256}\left(\mathrm{modality}(o) \Vert o\right),
 $$
 
 and its embedding is stored persistently as \(h(o)\mapsto\mathbf{e}(o)\) in SQLite. The full caption or Base64 image is therefore never used as a dictionary key.
@@ -148,7 +148,7 @@ For image–image pairs, the notebook computes a 64-bit perceptual hash from the
 
 $$
 s_{\mathrm{pHash}}(o_1,o_2)
-=1-\frac{d_H\!\left(p(o_1),p(o_2)\right)}{64},
+=1-\frac{d_H\left(p(o_1),p(o_2)\right)}{64},
 $$
 
 where \(p(o)\) is the perceptual hash and \(d_H\) is Hamming distance. This feature measures visual resemblance despite small encoding or pixel-level changes.
@@ -156,9 +156,9 @@ where \(p(o)\) is the perceptual hash and \(d_H\) is Hamming distance. This feat
 For caption–caption pairs, separate word and character TF-IDF representations are fitted. For term \(t\) in caption \(d\), the weight is
 
 $$
-\operatorname{tfidf}(t,d)
-=\operatorname{tf}(t,d)
-\left[\log\!\left(\frac{N+1}{\operatorname{df}(t)+1}\right)+1\right],
+\mathrm{TFIDF}(t,d)
+=\mathrm{TF}(t,d)
+\left[\log\left(\frac{N+1}{\mathrm{DF}(t)+1}\right)+1\right],
 $$
 
 and the similarity of two L2-normalized TF-IDF vectors is
@@ -189,7 +189,7 @@ $$
 To reduce leakage, object hashes form a graph: two hashes are joined when they occur in the same training pair. Connected components define group labels,
 
 $$
-g_i=\operatorname{component}\!\left(h(o_{i1}),h(o_{i2})\right),
+g_i=\mathrm{component}\left(h(o_{i1}),h(o_{i2})\right),
 $$
 
 and `StratifiedGroupKFold` keeps every component wholly inside either the training or validation side of a fold. For fold \(f\), out-of-fold probabilities are produced only by a model that did not train on that fold:
