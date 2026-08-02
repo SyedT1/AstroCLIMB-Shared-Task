@@ -1,0 +1,424 @@
+
+Overview
+This Kaggle competition is only used to automate scoring for participants in the AstroCLIMB @ WASP 2026 , and offers no rewards.
+
+All relevant information about the workshop is available here.
+
+The competition is organized by the NASA Science eXplorer.
+
+Participants that wish to submit to TRACS need to register for AACL-IJCNLP 2026 here.
+
+Start
+
+4 days ago
+Close
+
+3 months to go
+Description
+Motivation
+Scientists rely on figures to share their discoveries, but this makes the information contained in the figures hard to parse, archive, and search. Recent multimodal neural-network models promise to extract this information, but have not yet been widely tested and adopted by the astronomy community.
+In partnership with astroexplorer.org, we propose a novel dataset and an associated task as a benchmark to evaluate a model’s multimodal capabilities. The task is to partially reconstruct the citation graph of astronomy papers solely from their figures and captions.
+
+The full dataset on Huggingface consists of over 100K figure+caption from the astroexplorer.org from recent open access astronomy papers.
+
+AstroCLIMB image: these figures come from the same astronomy paper. Courtesy of astroexplorer.org
+
+Task Description
+The goal of the task is multi-class, single-label classification. The inputs are pairs of objects. It could be two figures, a figure and a caption, or two captions. The possible outputs are:
+
+same paper if the two objects originated from the same scientific paper (they have the same DOI).
+related papers if the two objects originated from related papers (one object's DOI cites the DOIs of the second object).
+same figure if the two objects are actually from the same scientific figure (only for figure+caption pairs).
+unrelated papers if the two objects originated from unrelated papers (none of the previous cases).
+Input pairs only have one label and the relations between objects is symmetrical.
+
+This dataset is imagined by the authors to be more of a benchmark for multimodal models, rather than a meaningful task in itself. As such, participants are not necessarily expected to fully train large models solely for AstroCLIMB. Basic statistics or incorporation into a larger multimodal training process seem more appropriate.
+
+Datasets
+There are two versions of the same dataset:
+
+The full dataset on Huggingface here. This version consists of over 100K rows containing a figure, its caption, and relevant metadata such as source DOI, authors, related DOIs and more, which describe a citation graph of astronomy papers with an adjacency list. This version of the dataset does not list out pairs, as there are too many.
+A partial evaluation dataset here on Kaggle. This version lists out 10K pairs in each the train and test set. Many more pairs can be generated from the full dataset from the adjacency list described in the full dataset above.
+Huggingface Dataset
+Dataset({
+    features: ['image', 'UUID', 'Image ID', 'Paper DOI', 'Paper Title', 'Image Caption', 'Image Authors', 'References DOIs', 'Citing DOIs'],
+    num_rows: 94233
+})
+(test set to be released in November 2026)
+
+images are stored as PIL PNG objects.
+Image Caption are English language text.
+UUID, Image ID, Paper DOI, Paper Title are metadata.
+A more complete descriptions of the features can be found here.
+
+Kaggle Dataset
+id,same_figure,same_paper,related_papers,unrelated_papers,obj_1,obj_2
+...
+122,0,1,0,0,Distribution of stars in Fornax–Horol[...], n+avHx8atWrU5/tOfPn7/rrr[...]
+123,0,0,1,0,Distribution of the RVs for TOI-2046b[...], iVBORw0KGgoAAAANSUhEUgAA[...]
+...
+Both the training and the test set are built from the full dataset and consist 10K pairs of objects along with their binary classification.
+
+obj_1, obj_2 are the input features. Some of these are English language character strings, others are images encoded as strings and need to be converted to PIL images. The code to detect and convert to images is available as a notebook here
+same_figure, same_paper, related_papers, unrelated_papers are the target classes.
+id
+A more complete descriptions of the features can be found on Kaggle here.
+
+Evaluation
+Models will be evaluated using macro-F1 score over the 4 target classes. Submissions should be formatted in a .csv file as follows:
+
+id,same_figure,same_paper,related_papers,unrelated_papers
+0,0,1,0,0
+1,1,0,0,0
+2,0,1,0,0
+...
+A full sample submission can be found here.
+
+
+Dataset Description
+Full description of the dataset is available here.
+
+Files
+4 files
+
+Size
+20.22 GB
+
+Type
+csv
+
+License
+MIT
+
+test.csv(10.13 GB)
+
+3 of 3 columns
+
+
+id
+
+obj_1
+
+obj_2
+Label	Count
+0.00 - 999.90	1,000
+999.90 - 1999.80	1,000
+1999.80 - 2999.70	1,000
+2999.70 - 3999.60	1,000
+3999.60 - 4999.50	1,000
+4999.50 - 5999.40	1,000
+5999.40 - 6999.30	1,000
+6999.30 - 7999.20	1,000
+7999.20 - 8999.10	1,000
+8999.10 - 9999.00	1,000
+0
+9999
+6647
+
+unique values
+6546
+
+unique values
+0
+Box plot statistic for CH3OH, H2CO, and NH3 abundances in comets. Starting from the left, we show th...
+iVBORw0KGgoAAAANSUhEUgAACBIAAAS5CAIAAADk+z17AAEAAElEQVR4nOydeZgcV3nu37PV0t2zz0ijxbJk2bK84QUM2LHNYkKw...
+1
+Example of an uncorrected LXD spectrum, reflected continuum, and thermally corrected data.
+iVBORw0KGgoAAAANSUhEUgAAA/oAAAJ+CAIAAACM0uyMAAEAAElEQVR4nOydd5gUVdbGT6XunkzOIhlRVAQXBERETCgroq4BURTX...
+2
+Experimental rotational spectrum of 2-methoxyethanol (black) overlaid with the simulated spectrum of...
+iVBORw0KGgoAAAANSUhEUgAABj0AAAQHCAIAAAAoGzwlAAEAAElEQVR4nOz9eZxcZZk3/l/3cs6p6i3dWUhCEpIQlkAMIsgmyyAi...
+3
+An example of the fitting process for one of the UDGs (AGC 334349). Top row: from left, the HSC gri-...
+iVBORw0KGgoAAAANSUhEUgAACHoAAAd7CAIAAABLA9zdAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+4
+The evolution of elemental abundances [X/Fe] for O, Mg, Si, S, Ar, and Ca (as well as [α/Fe] ≡([O/Fe...
+iVBORw0KGgoAAAANSUhEUgAAA+gAAALtCAIAAAA0e9m0AAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+5
+A comparison of the coronal hole maps of the equatorial coronal hole (CH1 in Figure 1; 2015 August 2...
+iVBORw0KGgoAAAANSUhEUgAAB5oAAAnECAIAAABUuv+XAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+6
+Feature visualization. Regular convolution and MSCP-Net extract the features of the spectrum, with t...
+iVBORw0KGgoAAAANSUhEUgAABwgAAAJLCAIAAAB8BVW0AAEAAElEQVR4nOz9e7gtTVXfi3/HGNU951x7vxckRCWJohhN8HASLygY...
+7
+Joint posteriors on the normalized intensity and FWHM of a Gaussian fitted without any noise modelin...
+iVBORw0KGgoAAAANSUhEUgAAA/wAAAO/CAIAAAD9D1puAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+8
+SED fit of our best-fit JP model (Run 5 in Table 1). The combined model is shown in blue, the self-a...
+iVBORw0KGgoAAAANSUhEUgAABdwAAANoCAIAAABV3L9qAAEAAElEQVR4nOydd3yV1f3Hv+cZd2QACUNFRYa77O0oI4ThHnXUUReb...
+9
+Same as Figure 2 but for the total LOS unsigned magnetic flux.
+iVBORw0KGgoAAAANSUhEUgAAB54AAAp6CAIAAABMeTd1AAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+10
+Wide-angle deep image of the environment surrounding LS Peg, emphasizing the broadband filters to sh...
+iVBORw0KGgoAAAANSUhEUgAABDoAAANhCAIAAACJoUxUAAEAAElEQVR4nDT995Nt2XXfCS6z9z7n3Hsz82Xm86bcK48qlAUKBUcC...
+11
+Top panel: Legacy Survey DR9 grz color image of ZTF18aajyzfv. Middle panel: The g and z detection ce...
+iVBORw0KGgoAAAANSUhEUgAAA3EAAAldCAIAAAARCD0YAAEAAElEQVR4nOy9TbIlSdIspGoet7qfgCDCXhgyZAvATpjAYhkzReB1...
+12
+Deprojected radial profiles of the ALMA 1.3 mm dust continuum image along the near (red line) and fa...
+iVBORw0KGgoAAAANSUhEUgAAA/wAAALxCAIAAABuKjrGAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+13
+Examples of 2D slices of the multidimensional feature space (see Table 2) showing the TD content aft...
+iVBORw0KGgoAAAANSUhEUgAABg4AAAhQCAIAAAB99FclAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+14
+Evolution of mass-weighted V/σ ⋆ of S0s. Each history is shown in different colors.
+iVBORw0KGgoAAAANSUhEUgAAA9sAAAInCAIAAAAHzN1dAAEAAElEQVR4nOy9d7xVxdX//5my9z7n9nsBQUURC1ETC80WNVLEFpPY...
+15
+The MHD plasma density (solid black), speed (dashed black), and partial PUI density from 2 to 6 keV ...
+iVBORw0KGgoAAAANSUhEUgAAB9AAAAjFCAIAAACwCbDvAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+16
+Brightness of the [Cl IV] line at 11.76 μm vs. brightness at 20.31 μm. The blue points represent the...
+iVBORw0KGgoAAAANSUhEUgAAA+MAAAL3CAIAAABu1gO+AAEAAElEQVR4nOy92ZMb2ZXff2+u2Pe1sFSh9p0s7mw2e5UlzVijCVnh...
+17
+High-redshift disk galaxy candidate identification and modeling. The CEERS JWST F150W images were an...
+iVBORw0KGgoAAAANSUhEUgAABUYAAAloCAIAAAAnJfgEAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+18
+Our deep Hα and [O III] images of the WR 71 nebula. The Wolf–Rayet star, HD 143414, is marked.
+iVBORw0KGgoAAAANSUhEUgAAAlYAAAPgCAIAAAB/I6WUAAEAAElEQVR4nOz9eZwlZXUwjp/zPFV19+7b+949+8LswwwDwyqbIIKA...
+19
+The Y rs matrix specifies the set of requests assigned to each slot. Note that a single request ma...
+iVBORw0KGgoAAAANSUhEUgAAA/kAAAQyCAIAAAB8r6iiAAEAAElEQVR4nOz9Z5Atx5UmCH7nuHtEXJlaZ758+bSWwIMGCBAgCVAU...
+20
+A comparison of the retrieved spectra and selected posterior distributions in allowing a fixed offse...
+iVBORw0KGgoAAAANSUhEUgAACHkAAAM5CAIAAAAW6+iqAAEAAElEQVR4nOydeZgVxfX+T1X1cmfYBlCjUdnBHdk1fhXZB9QkGreo...
+21
+Measurement errors of the DD-PAYNE stellar labels compared to theoretical precision limit given by t...
+iVBORw0KGgoAAAANSUhEUgAAB9EAAAgsCAIAAABugJGbAAEAAElEQVR4nOydd3hVVdb/1ym3JIQS2oyNDoqvSseGtCQEdMaCFNvY...
+22
+Prior and Posterior distribution of the maximum energy of the proton distribution after fitting a ha...
+iVBORw0KGgoAAAANSUhEUgAABEIAAANNCAIAAAAcUUx1AAEAAElEQVR4nOz9eZRc13UY/O59zp1q6nkEujHPAAGQICVSFCWRFCVS...
+23
+(a) [O III]/Hα ratios derived from photoionization models of CLOUDY, assuming a typical AGN SED (C. ...
+iVBORw0KGgoAAAANSUhEUgAADq4AAAc1CAIAAADAHlKxAAEAAElEQVR4nOy9d1wUx/8/vnuFo3dQQATpRcWCKGIBsfcajSaxxViw...
+24
+Results of injection-and-recovery tests for the timing bias using the simulated Kepler-like light cu...
+iVBORw0KGgoAAAANSUhEUgAAA+UAAAInCAIAAABx9m/WAAEAAElEQVR4nOxdd5xVxdl+Zuacc8s2dmnSYemIigqKNMHYsEUNGrsS...
+25
+Full model in the training parameter space (left column), the mean function prediction (second colum...
+iVBORw0KGgoAAAANSUhEUgAACHkAAANpCAIAAAAaZeBdAAEAAElEQVR4nOx9d3hUZfr2e6ZlZtJ77wkJBBI6SADpHVQURUXXuoJt...
+26
+Cold solar flare locations on the solar disk (top) and distribution by longitude (bottom).
+iVBORw0KGgoAAAANSUhEUgAAA/0AAAYGCAIAAAB9MFxKAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+27
+A diagram of the data flow through the CHIME postcorrelation receiver system. The receiver system pr...
+iVBORw0KGgoAAAANSUhEUgAACHUAAAZWCAIAAACnTZoMAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+28
+Didymos’s phase curve parameters compared to NEA parameters from the literature (see Table 5). The N...
+iVBORw0KGgoAAAANSUhEUgAABwgAAAncCAIAAAB+YSe1AAEAAElEQVR4nOydd5gcxZn/37equntmdle7SgQhQBYgjIkSkgAnQAnh...
+29
+U-Net architecture of our NN to perform semantic segmentation of imaging data for galaxy-scale stron...
+iVBORw0KGgoAAAANSUhEUgAABNMAAAHHCAIAAAAajIk1AAEAAElEQVR4nOydd3wURf/HvzN7/XKX3hPS6BBISOgtVBEVLCCgWChi...
+30
+The black hole mass measurements from the dim state vs. bright state of the Hβ (left) and Hα (right)...
+iVBORw0KGgoAAAANSUhEUgAABXYAAAK8CAIAAADEfnD/AAEAAElEQVR4nOz9eZxlVXnvj3+etdbe+5xTc3XTyNQMIohIA9KAA8jQ...
+31
+The correlations between f MS and the spectral properties. The meanings of the symbols, lines, and r...
+iVBORw0KGgoAAAANSUhEUgAACHsAAAlrCAIAAAD3KM4lAAEAAElEQVR4nOy9eZwcVbn//zlLVXXPZLKxhS2QBBBFgSyskUDIAq6s...
+32
+The redshift and stellar mass distribution of the SMILES release catalog. Spectroscopic (photometric...
+iVBORw0KGgoAAAANSUhEUgAAA+UAAAM4CAIAAAAlAdQsAAEAAElEQVR4nOz9ebSkWVUn/O+9zznPEMOdcq7Mmud5QKQRoaWQsRCK...
+33
+Proteinogenic amino acid abundances measured in the shocked and unshocked samples in this study. Ami...
+iVBORw0KGgoAAAANSUhEUgAAA+cAAALVCAIAAAAtWQf5AAEAAElEQVR4nOx9d5QVxfb1qe6+cQI5g0QlZyRIlmdO8AQBE2bEgKJP...
+34
+Photometric SFR vs. redshift scaled as ﹩\mathrm{log}(1+z)﹩. Point shapes and colors indicate SED cla...
+iVBORw0KGgoAAAANSUhEUgAAA+wAAAMSCAIAAAB/I9m2AAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+35
+Distributions of time intervals between observations of the same field in the g band for YSE DR1, tr...
+iVBORw0KGgoAAAANSUhEUgAAA+gAAAK0CAIAAAAf+oCLAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+36
+Full-cadence dynamic spectra for the two false-positive events found in the reduced C. Choza et al. ...
+iVBORw0KGgoAAAANSUhEUgAACBYAAAQhCAIAAAAcJQkvAAEAAElEQVR4nOxdd3gU1d4+s33TewcCAQIBQgmQ0EGKiFhQQRBBFMWG...
+37
+Imaging results from the three synthetic data sets in Table 4. The first row shows the total intensi...
+iVBORw0KGgoAAAANSUhEUgAACHoAAAhtCAIAAABoxE2yAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+38
+The numbers Np( = Sobs/Spatch, cyan line), Npatch( = Sjet/Spatch, yellow line), and Nobs( = Sjet/Sob...
+iVBORw0KGgoAAAANSUhEUgAABNgAAALQCAIAAADNV1p8AAEAAElEQVR4nOzdd5gb1fU38HNHXVppe6/u3YCNC7hgGzDNQOidEHp7...
+39
+Comparison of stellar metallicity ([Fe/H]) between each database (y-axis) and the literature (x-axis...
+iVBORw0KGgoAAAANSUhEUgAABwQAAAZuCAIAAADFFwWsAAEAAElEQVR4nOz9aZCc133fj/7Oebbet+menn2fwWAdrAR3iiIpiZIs...
+40
+Panels (a), (c), and (e) display the photometric error of SExtractor on SDSS data, the photometry de...
+iVBORw0KGgoAAAANSUhEUgAACHoAAAkjCAIAAAD74S0aAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+41
+Channel maps of the blueshifted emission of 12CO in the EHV regime (∣V∣ > 30 km s−1) in IRS1, shown ...
+iVBORw0KGgoAAAANSUhEUgAAB7AAAAfyCAIAAACO2fNjAAEAAElEQVR4nOz9d/wtVX3vj7/eq8zM3p96zuEcBOnVqBCqxhIRKcdy...
+42
+Phase-folded Kepler data for KIC06670812 with the joint fit LC solution (magenta curves), as in Figu...
+iVBORw0KGgoAAAANSUhEUgAABwgAAAUpCAIAAAD8nsVrAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+43
+Residuals between CALSPEC standard spectra integrated with standard filters are shown between the ve...
+iVBORw0KGgoAAAANSUhEUgAAA/wAAAZvCAIAAAC9CWnmAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+44
+The star–galaxy separation procedure shown here for WFC3 F125W images (adapted from Windhorst et al....
+iVBORw0KGgoAAAANSUhEUgAABiYAAARYCAIAAAAKjfwYAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+45
+Trajectory of the 2014 January 8 meteor (red), shown intersecting with that of Earth (blue) at the t...
+iVBORw0KGgoAAAANSUhEUgAAAlgAAANgCAIAAAB/WoH/AAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+46
+Measured masses and radii of the TOI-1136 planets and other planets on the NASA Exoplanet Archive. W...
+iVBORw0KGgoAAAANSUhEUgAAA+gAAANFCAIAAABnQ0GDAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+47
+Scatter in M*/L after correcting the correlation between M*/L and the sSFR. The symbols are the same...
+iVBORw0KGgoAAAANSUhEUgAAA+oAAAO3CAIAAAA77CmsAAEAAElEQVR4nOzdeXhV1bk/8Hettfc5J2EMINqKylytAzPUGQhhaLVV...
+48
+Calculated stellar luminosities vs. the measured variability periods of stars that are identified as...
+iVBORw0KGgoAAAANSUhEUgAAB2wAAAT3CAIAAACq0ReKAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+49
+Stokes parameters St that delineate different accretion regimes for a 0.5M ⊙ host star and ﹩{\dot{M}...
+iVBORw0KGgoAAAANSUhEUgAACHcAAAhHCAIAAAA7DeBSAAAKMGlDQ1BJQ0MgUHJvZmlsZQAAeJydlndUVNcWh8+9d3qhzTAUKUPv...
+Data Explorer
+20.22 GB
+
+sample_submission.csv
+
+solution.csv
+
+test.csv
+
+train.csv
+
+Summary
+4 files
+
+22 columns
+
+
+Download All
+Metadata\
+
+
+ACL Announcements
+Jul 29, 2026, 10:02:19 AM (3 days ago) 
+to Announcements
+====================================================================
+
+CALL FOR PARTICIPATION
+
+
+
+AstroCLIMB: Astronomy Citation Linking from Illustrations, a Multimodal Benchmark
+
+
+
+Shared task of the 4th Workshop on Artificial Intelligence for
+
+Scientific Publications (WASP 2026), co-located with IJCNLP-AACL 2026
+
+Workshop: November 9-10, 2026 (online)
+
+
+
+Task page: https://ui.adsabs.harvard.edu/WIESP/2026/shared_task
+
+Kaggle competition: https://www.kaggle.com/competitions/astroclimb/overview
+
+Dataset: https://huggingface.co/datasets/adsabs/AstroCLIMB
+
+====================================================================
+
+
+
+OVERVIEW
+
+Scientists rely on figures to communicate their results, yet the information locked in those figures is hard to parse, archive, and search. Recent multimodal models promise to change that, but they have seen little testing on real scientific figures. AstroCLIMB, built in partnership with astroexplorer.org, offers a benchmark to probe exactly this capability: can a model reconstruct part of the citation graph of astronomy papers from their figures and captions alone?
+
+
+
+The dataset comprises over 100K figure-and-caption pairs drawn from recent open-access astronomy papers.
+
+
+
+TASK
+
+Multi-class, single-label classification. Each input is a pair of objects: two figures, a figure and a caption, or two captions. The relation is symmetric, and each pair has exactly one label:
+
+
+
+- same figure: the two objects come from the same scientific figure (figure-caption pairs only)
+
+- same paper: the two objects come from the same paper (same DOI)
+
+- related papers: one object's paper cites the other's
+
+- unrelated papers: none of the above
+
+
+
+A note on scope: AstroCLIMB is meant as a benchmark for multimodal models rather than an end in itself. Participants are not expected to train large models from scratch for it; computing basic statistics or folding it into a larger multimodal training pipeline is very much in keeping with the intent.
+
+
+
+DATA
+
+Two versions of the same dataset are available:
+
+- Full dataset (Hugging Face): over 94K rows, each with a figure, its caption, and metadata (source DOI, title, authors, cited and citing DOIs) describing an astronomy citation graph as an adjacency list. Pairs are not enumerated; you generate them from the adjacency list.
+
+  https://huggingface.co/datasets/adsabs/AstroCLIMB
+
+
+
+- Evaluation dataset (Kaggle): 10K enumerated pairs each in the train and test splits, with labels. Many more pairs can be generated from the full dataset.
+
+  https://www.kaggle.com/competitions/astroclimb/overview
+
+
+
+In the Kaggle data, some objects are English-language strings, and others are images encoded as strings; a helper notebook for decoding them to images is provided on Kaggle.
+
+
+
+EVALUATION
+
+Systems are evaluated on Kaggle using macro-F1 over the four classes. Submissions are CSV files with per-class indicators; a sample submission is available on the competition page.
+
+
+
+HOW TO PARTICIPATE
+
+1. Register and join the competition on Kaggle to access the data and score submissions:
+
+   https://www.kaggle.com/competitions/astroclimb/overview
+
+2. Optionally, write up your system description as a paper using the ACL LaTeX template
+
+   (https://github.com/acl-org/acl-style-files) and submit it via OpenReview:
+
+   https://openreview.net/group?id=aclweb.org/AACL-IJCNLP/2026/Workshop/WASP
+
+
+
+System description papers undergo light peer review and, if accepted, are published in the WASP 2026 proceedings in the ACL Anthology. We encourage a submission regardless of leaderboard position.
+
+
+
+TIMELINE (subject to change; all deadlines 11.59 pm UTC-12h, anywhere on Earth)
+
+- 1st CfP + Registration opens: July 27, 2026
+
+- Train and scoring portion of test data release: July 27, 2026
+
+- Registration ends: September 12, 2026
+
+- System run and output submission: September 13, 2026
+
+- System paper submission: September 14, 2026
+
+- Result announcement: October 1, 2026
+
+- Camera-ready submission: October 12, 2026
+
+- Full data release: November 2, 2026
+
+- Workshop: November 9-10, 2026
+
+
+
+CONTACT
+
+For inquiries, contact Felix Grezes at felix....@cfa.harvard.edu
+
+We look forward to your participation.
