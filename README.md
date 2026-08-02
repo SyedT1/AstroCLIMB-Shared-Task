@@ -80,16 +80,17 @@ id,same_figure,same_paper,related_papers,unrelated_papers
 
 Every row must assign exactly one class.
 
-## Starter notebook results
+## Notebook results
 
-The starter notebook is kept in the [`notebooks/`](notebooks/) directory.
+The experiment notebooks are kept in the [`notebooks/`](notebooks/) directory.
 
 | Notebook | Approach | Kaggle score |
 | --- | --- | ---: |
 | [`astroclimb_kaggle_starter.ipynb`](notebooks/astroclimb_kaggle_starter.ipynb) | CLIP pair features + balanced logistic regression | **0.39283** |
-| [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) | Cached CLIP, pHash, TF-IDF, grouped OOF validation, threshold tuning, and nonlinear model comparison | Not evaluated yet |
+| [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) | Cached CLIP, pHash, TF-IDF, grouped OOF validation, threshold tuning, and nonlinear model comparison | **0.44505** |
+| [`astroclimb_kaggle_graph_resolver.ipynb`](notebooks/astroclimb_kaggle_graph_resolver.ipynb) | Hugging Face entity resolution, DOI citation-graph reconstruction, and confidence-gated fallback overrides | Not evaluated yet |
 
-The reported value is the score rendered by Kaggle for the submission produced by this notebook. The competition evaluates submissions with macro-averaged F1, as described above.
+The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the score from 0.39283 to 0.44505, an absolute gain of 0.05222.
 
 ### Notebook working procedure
 
@@ -132,6 +133,89 @@ p(y=k\mid\mathbf{x}) =
 $$
 
 The predicted class is converted to the required one-hot submission row. Processing is performed in small CSV chunks and saved as compressed feature shards, which keeps the pipeline usable with the approximately 10 GB input files and allows interrupted extraction to resume.
+
+### Improved notebook procedure
+
+The [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) pipeline retains the normalized CLIP representation above but avoids recomputing embeddings for repeated objects. Each object is assigned a fixed-size SHA-256 key that includes its modality,
+
+$$
+h(o)=\operatorname{SHA256}(\operatorname{modality}(o)\,\Vert\,o),
+$$
+
+and its embedding is stored persistently as \(h(o)\mapsto\mathbf{e}(o)\) in SQLite. The full caption or Base64 image is therefore never used as a dictionary key.
+
+For image–image pairs, the notebook computes a 64-bit perceptual hash from the low-frequency coefficients of a two-dimensional discrete cosine transform. Its normalized similarity is
+
+$$
+s_{\mathrm{pHash}}(o_1,o_2)
+=1-\frac{d_H\!\left(p(o_1),p(o_2)\right)}{64},
+$$
+
+where \(p(o)\) is the perceptual hash and \(d_H\) is Hamming distance. This feature measures visual resemblance despite small encoding or pixel-level changes.
+
+For caption–caption pairs, separate word and character TF-IDF representations are fitted. For term \(t\) in caption \(d\), the weight is
+
+$$
+\operatorname{tfidf}(t,d)
+=\operatorname{tf}(t,d)
+\left[\log\!\left(\frac{N+1}{\operatorname{df}(t)+1}\right)+1\right],
+$$
+
+and the similarity of two L2-normalized TF-IDF vectors is
+
+$$
+s_{\mathrm{TFIDF}}(d_1,d_2)
+=\mathbf{v}_{d_1}^{\top}\mathbf{v}_{d_2}.
+$$
+
+Both word and character similarities are included. Modality indicators ensure that TF-IDF is used only for caption–caption pairs and perceptual hashing only for image–image pairs. The improved feature vector is
+
+$$
+\mathbf{x}_{\mathrm{improved}}
+=\left[
+|\mathbf{e}_1-\mathbf{e}_2|\;;\;
+\mathbf{e}_1\odot\mathbf{e}_2\;;\;
+s_{\mathrm{cos}}\;;\;
+\mathbf{m}\;;\;
+|\ell_1-\ell_2|\;;\;
+\min(\ell_1,\ell_2)\;;\;
+q_{\mathrm{exact}}\;;\;
+s_{\mathrm{pHash}}\;;\;
+s_{\mathrm{word}}\;;\;
+s_{\mathrm{char}}
+\right].
+$$
+
+To reduce leakage, object hashes form a graph: two hashes are joined when they occur in the same training pair. Connected components define group labels,
+
+$$
+g_i=\operatorname{component}\!\left(h(o_{i1}),h(o_{i2})\right),
+$$
+
+and `StratifiedGroupKFold` keeps every component wholly inside either the training or validation side of a fold. For fold \(f\), out-of-fold probabilities are produced only by a model that did not train on that fold:
+
+$$
+\widehat{\mathbf{p}}_i^{\mathrm{OOF}}
+=M^{(-f)}(\mathbf{x}_i),\qquad i\in f.
+$$
+
+The notebook compares balanced multinomial logistic regression with histogram gradient boosting. The nonlinear model represents each class score as an additive ensemble of decision trees,
+
+$$
+F_k(\mathbf{x})=F_{k,0}+\eta\sum_{r=1}^{R}f_{k,r}(\mathbf{x}),
+$$
+
+allowing interactions such as high perceptual similarity being important only for image–image pairs. The candidate with the stronger grouped OOF macro-F1 is refitted on all training rows.
+
+Finally, class-specific thresholds are tuned on OOF probabilities. Prediction uses scaled class competition,
+
+$$
+\hat y_i
+=\arg\max_{k\in\{1,\ldots,4\}}
+\frac{\widehat p_{ik}}{\tau_k},
+$$
+
+where the threshold vector \(\boldsymbol{\tau}\) is selected by coordinate search to maximize macro-F1. The resulting `submission_improved.csv` received a Kaggle score of **0.44505**.
 
 ## Suggested approach
 
