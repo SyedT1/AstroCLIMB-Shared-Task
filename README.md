@@ -217,6 +217,107 @@ $$
 
 where the threshold vector \(\boldsymbol{\tau}\) is selected by coordinate search to maximize macro-F1. The resulting `submission_improved.csv` received a Kaggle score of **0.44505**.
 
+### Graph resolver notebook procedure
+
+The [`astroclimb_kaggle_graph_resolver.ipynb`](notebooks/astroclimb_kaggle_graph_resolver.ipynb) treats classification primarily as entity resolution followed by deterministic citation-graph inference. It streams only the required metadata columns from `adsabs/AstroCLIMB` and stores compact fingerprints, record metadata, and matches in SQLite.
+
+Caption text is normalized with Unicode NFKC normalization, case folding, whitespace collapsing, and trimming. Its fingerprint is
+
+$$
+f_T(t)=\mathrm{SHA256}\left(\mathrm{normalize}(t)\right).
+$$
+
+Image matching does not hash the PNG file bytes because identical pixels can have different compression. Each image is decoded into canonical RGB pixels, and its fingerprint includes its dimensions:
+
+$$
+f_I(I)=\mathrm{SHA256}\left(
+w(I) \Vert h(I) \Vert \mathrm{RGB}(I)
+\right).
+$$
+
+For a Kaggle object \(o\), exact fingerprint lookup returns a possibly empty candidate set of Hugging Face records,
+
+$$
+\mathcal{C}(o)=
+\left\{r:\ f_{m(o)}(r)=f_{m(o)}(o)\right\},
+$$
+
+where \(m(o)\in\{T,I\}\) denotes text or image modality. Candidate sets are retained rather than forcing an arbitrary match when duplicate captions or images occur.
+
+DOIs are canonicalized by lowercasing, trimming punctuation, and removing prefixes such as `https://doi.org/` and `doi:`. For a resolved record \(r\), let \(u(r)\) be its figure UUID, \(d(r)\) its normalized source DOI, \(R(r)\) its reference-DOI set, and \(C(r)\) its citing-DOI set. The pair label is reconstructed hierarchically:
+
+$$
+L(r_1,r_2)=
+\begin{cases}
+\mathrm{same\_figure},
+& u(r_1)=u(r_2) \text{ and } m(o_1)\ne m(o_2),\\
+\mathrm{same\_paper},
+& d(r_1)=d(r_2),\\
+\mathrm{related\_papers},
+& d(r_2)\in R(r_1)\cup C(r_1)\\
+& \quad \text{or } d(r_1)\in R(r_2)\cup C(r_2),\\
+\mathrm{unrelated\_papers},
+& \text{otherwise}.
+\end{cases}
+$$
+
+For ambiguous matches, the notebook evaluates every candidate combination:
+
+$$
+\mathcal{L}(o_1,o_2)=
+\left\{L(r_1,r_2):
+r_1\in\mathcal{C}(o_1),\;
+r_2\in\mathcal{C}(o_2)
+\right\}.
+$$
+
+A graph prediction is accepted only when both candidate sets are nonempty and all candidate combinations agree:
+
+$$
+\widehat y_{\mathrm{graph}}=
+\begin{cases}
+y, & \mathcal{L}(o_1,o_2)=\{y\},\\
+\varnothing, & \text{otherwise}.
+\end{cases}
+$$
+
+This unanimity rule prevents an uncertain metadata match from silently replacing a learned prediction. If \(c(o)\) is the strongest entity-resolution confidence for object \(o\), pair confidence is conservative:
+
+$$
+c_{\mathrm{pair}}=\min\left(c(o_1),c(o_2)\right).
+$$
+
+The final hybrid prediction uses the graph result only when it is unambiguous and sufficiently confident; otherwise it retains the improved model's fallback prediction:
+
+$$
+\widehat y=
+\begin{cases}
+\widehat y_{\mathrm{graph}},
+& \widehat y_{\mathrm{graph}}\ne\varnothing
+\text{ and }c_{\mathrm{pair}}\ge\tau,\\
+\widehat y_{\mathrm{fallback}},
+& \text{otherwise}.
+\end{cases}
+$$
+
+The current notebook indexes only exact caption and pixel matches, assigns them confidence 1, and therefore effectively uses \(\tau=1\). The confidence form also supports adding calibrated approximate matches later without changing the hybrid decision rule.
+
+Evaluation reports graph accuracy together with resolved-pair coverage. If \(S\) is the set of pairs receiving an unambiguous graph prediction, coverage is
+
+$$
+\mathrm{coverage}=\frac{|S|}{N},
+$$
+
+and resolved accuracy is
+
+$$
+\mathrm{accuracy}_{S}
+=\frac{1}{|S|}\sum_{i\in S}
+\mathbb{1}\left[\widehat y_i=y_i\right].
+$$
+
+Coverage must accompany the resolved-subset score: high accuracy on a small resolved subset does not imply high performance over all Kaggle pairs. The optional Hugging Face image pass is disabled by default because it may scan most of the 72.4 GB image data; the metadata pass requests Parquet column projection during loading to exclude the image column.
+
 ## Suggested approach
 
 A practical solution can combine modality-specific representations and pairwise similarity features:
