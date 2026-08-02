@@ -239,10 +239,10 @@ For a Kaggle object \(o\), exact fingerprint lookup returns a possibly empty can
 
 $$
 \mathcal{C}(o)=
-\left\{r:\ f_{m(o)}(r)=f_{m(o)}(o)\right\},
+\bigl[r \mid f_{m(o)}(r)=f_{m(o)}(o)\bigr],
 $$
 
-where \(m(o)\in\{T,I\}\) denotes text or image modality. Candidate sets are retained rather than forcing an arbitrary match when duplicate captions or images occur.
+where \(m(o)\in(T,I)\) denotes text or image modality. The square brackets denote the collection of all matching records. Candidate collections are retained rather than forcing an arbitrary match when duplicate captions or images occur.
 
 DOIs are canonicalized by lowercasing, trimming punctuation, and removing prefixes such as `https://doi.org/` and `doi:`. For a resolved record \(r\), let \(u(r)\) be its figure UUID, \(d(r)\) its normalized source DOI, \(R(r)\) its reference-DOI set, and \(C(r)\) its citing-DOI set. The pair label is reconstructed hierarchically:
 
@@ -265,10 +265,10 @@ For ambiguous matches, the notebook evaluates every candidate combination:
 
 $$
 \mathcal{L}(o_1,o_2)=
-\left\{L(r_1,r_2):
+\bigl[L(r_1,r_2) \mid
 r_1\in\mathcal{C}(o_1),\;
 r_2\in\mathcal{C}(o_2)
-\right\}.
+\bigr].
 $$
 
 A graph prediction is accepted only when both candidate sets are nonempty and all candidate combinations agree:
@@ -276,7 +276,8 @@ A graph prediction is accepted only when both candidate sets are nonempty and al
 $$
 \widehat y_{\mathrm{graph}}=
 \begin{cases}
-y, & \mathcal{L}(o_1,o_2)=\{y\},\\
+y, & |\mathcal{L}(o_1,o_2)|=1
+\text{ and }y\in\mathcal{L}(o_1,o_2),\\
 \varnothing, & \text{otherwise}.
 \end{cases}
 $$
