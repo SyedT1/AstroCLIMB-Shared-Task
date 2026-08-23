@@ -226,11 +226,11 @@ $$
 \begin{cases}
 r_i, & r_i \in \mathcal{Y},\\
 \displaystyle\arg\max_{k\in\mathcal{Y}} p_{m_i,k}(\mathbf{x}_i),
-& r_i=\texttt{unmatched},
+& r_i=\varnothing,
 \end{cases}
 $$
 
-where \(\mathcal{Y}=\{\texttt{same\_figure},\texttt{same\_paper},\texttt{related\_papers},\texttt{unrelated\_papers}\}\), \(r_i\) is the metadata-derived relationship, and \(p_{m_i,k}\) is the fallback probability from the specialist for modality \(m_i\).
+Here \(\mathcal{Y}=\{\mathrm{SF},\mathrm{SP},\mathrm{RP},\mathrm{UP}\}\), corresponding respectively to `same_figure`, `same_paper`, `related_papers`, and `unrelated_papers`. The value \(r_i\) is the metadata-derived relationship, \(r_i=\varnothing\) means unresolved, and \(p_{m_i,k}\) is the fallback probability from the specialist for modality \(m_i\).
 
 #### 1. Prepare and locate the inputs
 
@@ -253,14 +253,14 @@ For uniquely matched metadata records \(a\) and \(b\), the rule is evaluated in 
 $$
 \rho(a,b)=
 \begin{cases}
-\texttt{same\_figure}, & \mathrm{row}(a)=\mathrm{row}(b),\\
-\texttt{same\_paper}, & d_a=d_b\ne\varnothing,\\
-\texttt{related\_papers}, & d_a\leftrightarrow d_b,\\
-\texttt{unrelated\_papers}, & \text{otherwise},
+\mathrm{SF}, & \mathrm{row}(a)=\mathrm{row}(b),\\
+\mathrm{SP}, & d_a=d_b\ne\varnothing,\\
+\mathrm{RP}, & d_a\leftrightarrow d_b,\\
+\mathrm{UP}, & \text{otherwise},
 \end{cases}
 $$
 
-where \(d_a\leftrightarrow d_b\) means that either DOI occurs in the other paper's reference or citation set. If an object is not found or does not have a unique metadata row, the initial result is `unmatched`. During labeled training matching, a known `same_figure` caption can also bootstrap the exact image-to-record hash mapping; the cached mapping is then available to the test pass.
+The symbols \(\mathrm{SF}\), \(\mathrm{SP}\), \(\mathrm{RP}\), and \(\mathrm{UP}\) denote the four class labels in the order defined above. The relation \(d_a\leftrightarrow d_b\) means that either DOI occurs in the other paper's reference or citation set. If an object is not found or does not have a unique metadata row, the initial result is `unmatched`. During labeled training matching, a known `same_figure` caption can also bootstrap the exact image-to-record hash mapping; the cached mapping is then available to the test pass.
 
 #### 3. Recover safe ambiguous matches by candidate consensus
 
@@ -268,7 +268,7 @@ An exact caption or image may correspond to several metadata rows. Let \(C_1\) a
 
 $$
 R_i=\lbrace\rho(a,b):a\in C_1,\ b\in C_2\rbrace
-\setminus\lbrace\texttt{unmatched}\rbrace.
+\setminus\lbrace\varnothing\rbrace.
 $$
 
 The pair is recovered only when all viable candidate combinations agree, that is, when \(|R_i|=1\). Otherwise it remains unresolved and is reserved for the learned fallback. The audit column `resolution` distinguishes `unique`, `candidate_consensus`, and `unresolved` rows.
