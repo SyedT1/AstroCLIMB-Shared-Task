@@ -88,6 +88,7 @@ The experiment notebooks are kept in the [`notebooks/`](notebooks/) directory.
 | --- | --- | ---: |
 | [`astroclimb_kaggle_starter.ipynb`](notebooks/astroclimb_kaggle_starter.ipynb) | CLIP pair features + balanced logistic regression | **0.39283** |
 | [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) | Cached CLIP, pHash, TF-IDF, grouped OOF validation, threshold tuning, and nonlinear model comparison | **0.44505** |
+| [`metadata-first-hybrid-training.ipynb`](notebooks/metadata-first-hybrid-training.ipynb) | Metadata-first DOI/citation-graph resolution with candidate consensus and modality-specific CatBoost fallbacks using SPECTER2, SigLIP2, DINO, TF-IDF, OCR, and pHash features | **0.48279** |
 
 The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the score from 0.39283 to 0.44505, an absolute gain of 0.05222.
 
@@ -238,3 +239,51 @@ Validation splits should prevent identical or closely related objects from appea
 - The competition brief states that the full benchmark test set is planned for release in November 2026.
 
 See [`details.txt`](details.txt) for the source competition description.
+
+## Metadata matching
+
+`metadata_matching.py` first indexes compact caption metadata, then collects the
+image hashes present in the requested competition CSV. By default it streams the
+Hugging Face image column in batches of 32 and retains only hashes relevant to
+that CSV:
+
+```bash
+python /kaggle/working/metadata_matching.py \
+  --competition-file train.csv \
+  --image-batch-size 32
+```
+
+Use `--metadata-only` to skip image matching, or `--pixel-hashes` to additionally
+match decoded pixels when PNG byte encodings differ. The latter is slower because
+every streamed metadata image must be decoded. The compact cache is reused on
+later runs, including a subsequent `test.csv` run.
+
+## Balanced Hugging Face pair generation
+
+`generate_hf_pairs.py` converts the Hugging Face metadata graph into balanced
+image-caption training manifests without reading or copying the 72 GB image
+column. It splits paper DOIs before sampling, so no paper is shared between its
+synthetic train and validation sets:
+
+```bash
+python /kaggle/working/generate_hf_pairs.py \
+  --metadata /kaggle/input/astroclimb/AstroCLIMB.parquet \
+  --output-dir /kaggle/working/hf_pairs \
+  --train-pairs-per-class 50000 \
+  --validation-pairs-per-class 10000
+```
+
+The output directory contains:
+
+- `hf_train_pairs.csv` and `hf_validation_pairs.csv`: balanced compact pair
+  manifests with source row indices, UUIDs, DOIs, labels, and sampling method;
+- `hf_doi_split.csv`: the reproducible paper-level split assignment;
+- `hf_pair_summary.json`: class, split, and hard-negative sampling counts.
+
+The four classes are constructed from exact row identity, shared DOI, citation
+edges, and DOI pairs with no citation edge. By default, 75% of unrelated pairs
+are sought from captions sharing a relatively uncommon token; remaining
+unrelated pairs are sampled randomly. Use `--hard-negative-fraction` to change
+that mixture. The downstream embedding job should resolve `image_row` and
+`caption_row` (or their stable UUID fields) against the original dataset and
+cache each source object's representation once.
