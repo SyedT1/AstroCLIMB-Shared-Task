@@ -243,7 +243,7 @@ The setup cell defines the random seed, chunk and model batch sizes, number of f
 Let \(n_c(o)\) denote NFKC Unicode normalization followed by whitespace collapse, trimming, and case folding. The matcher indexes a caption by
 
 $$
-h_c(o)=\operatorname{SHA256}\!\left(n_c(o)\right).
+h_c(o)=\mathrm{SHA256}\!\left(n_c(o)\right).
 $$
 
 Images are matched by a SHA-256 hash of the file bytes obtained after Base64 decoding; optional decoded-pixel hashes can recover visually identical PNGs with different file encodings. The metadata index stores compact identifiers, figure IDs, normalized paper DOIs, reference DOIs, and citing DOIs rather than the large objects themselves. It is saved as `astroclimb_metadata_index.pkl` and reused for train, test, and later notebook runs.
@@ -253,7 +253,7 @@ For uniquely matched metadata records \(a\) and \(b\), the rule is evaluated in 
 $$
 \rho(a,b)=
 \begin{cases}
-\texttt{same\_figure}, & \operatorname{row}(a)=\operatorname{row}(b),\\
+\texttt{same\_figure}, & \mathrm{row}(a)=\mathrm{row}(b),\\
 \texttt{same\_paper}, & d_a=d_b\ne\varnothing,\\
 \texttt{related\_papers}, & d_a\leftrightarrow d_b,\\
 \texttt{unrelated\_papers}, & \text{otherwise},
@@ -267,15 +267,15 @@ where \(d_a\leftrightarrow d_b\) means that either DOI occurs in the other paper
 An exact caption or image may correspond to several metadata rows. Let \(C_1\) and \(C_2\) be the candidate record sets for the two objects. The notebook evaluates every cross-product pair and removes `unmatched` results:
 
 $$
-R_i=\left\{\rho(a,b):a\in C_1,\ b\in C_2\right\}
-\setminus\{\texttt{unmatched}\}.
+R_i=\lbrace\rho(a,b):a\in C_1,\ b\in C_2\rbrace
+\setminus\lbrace\texttt{unmatched}\rbrace.
 $$
 
 The pair is recovered only when all viable candidate combinations agree, that is, when \(|R_i|=1\). Otherwise it remains unresolved and is reserved for the learned fallback. The audit column `resolution` distinguishes `unique`, `candidate_consensus`, and `unresolved` rows.
 
 #### 4. Cache modality-specific representations
 
-Each raw object is assigned the stable key \(h(o)=\operatorname{SHA256}(o)\). Normalized neural vectors and OCR text are persisted in `representations.sqlite`, so repeated objects and interrupted runs do not require another forward pass. For any encoder \(g\), the stored vector is
+Each raw object is assigned the stable key \(h(o)=\mathrm{SHA256}(o)\). Normalized neural vectors and OCR text are persisted in `representations.sqlite`, so repeated objects and interrupted runs do not require another forward pass. For any encoder \(g\), the stored vector is
 
 $$
 \mathbf{e}(o)=
