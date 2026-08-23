@@ -90,9 +90,9 @@ The experiment notebooks are kept in the [`notebooks/`](notebooks/) directory.
 | [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) | Cached CLIP, pHash, TF-IDF, grouped OOF validation, threshold tuning, and nonlinear model comparison | **0.44505** |
 | [`metadata-first-hybrid-training.ipynb`](notebooks/metadata-first-hybrid-training.ipynb) | Metadata-first DOI/citation-graph resolution with candidate consensus and modality-specific CatBoost fallbacks using SPECTER2, SigLIP2, DINO, TF-IDF, OCR, and pHash features | **0.48279** |
 
-The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the score from 0.39283 to 0.44505, an absolute gain of 0.05222.
+The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the starter score from 0.39283 to 0.44505, and the metadata-first hybrid raises it to 0.48279.
 
-### Notebook working procedure
+### Starter notebook working procedure
 
 For each pair, the notebook first identifies each object as either caption text or a Base64-encoded PNG. A pretrained CLIP model maps both modalities into the same embedding space. If the raw CLIP representation of object \(o_i\) is \(g(o_i)\), its normalized embedding is
 
@@ -216,6 +216,175 @@ $$
 $$
 
 where the threshold vector \(\boldsymbol{\tau}\) is selected by coordinate search to maximize macro-F1. The resulting `submission_improved.csv` received a Kaggle score of **0.44505**.
+
+### Metadata-first hybrid notebook working procedure
+
+The [`metadata-first-hybrid-training.ipynb`](notebooks/metadata-first-hybrid-training.ipynb) notebook uses a two-stage decision system. It first attempts to recover the source figure and paper of each object from the full Hugging Face metadata. A deterministic DOI/citation-graph rule is used whenever that evidence gives one unambiguous class. Only unresolved pairs are sent to a learned, modality-specific fallback model. The metadata rule therefore has priority over the statistical prediction:
+
+$$
+\widehat y_i =
+\begin{cases}
+r_i, & r_i \in \mathcal{Y},\\
+\displaystyle\arg\max_{k\in\mathcal{Y}} p_{m_i,k}(\mathbf{x}_i),
+& r_i=\texttt{unmatched},
+\end{cases}
+$$
+
+where \(\mathcal{Y}=\{\texttt{same\_figure},\texttt{same\_paper},\texttt{related\_papers},\texttt{unrelated\_papers}\}\), \(r_i\) is the metadata-derived relationship, and \(p_{m_i,k}\) is the fallback probability from the specialist for modality \(m_i\).
+
+#### 1. Prepare and locate the inputs
+
+Run the notebook on a Kaggle GPU and attach the full `train.csv`, `test.csv`, and `sample_submission.csv`. The included `_1000.csv` slices contain only `same_figure` examples and are suitable for smoke testing metadata matching, but not for training the four-class fallback. Run the embedded `%%writefile metadata_matching.py` cell before input discovery; it creates the matcher used by the remaining cells. When Internet access is disabled, also attach local copies of the required model folders.
+
+The setup cell defines the random seed, chunk and model batch sizes, number of folds, OCR switch, model identifiers, and output directory. DINOv3 is gated: accept its Hugging Face license and provide `HF_TOKEN` to use it. If it cannot be loaded, the code automatically falls back to DINOv2. Inputs are searched under `/kaggle/input`, `data`, the current directory, and `/kaggle/working`.
+
+#### 2. Build or reuse the exact metadata index
+
+Let \(n_c(o)\) denote NFKC Unicode normalization followed by whitespace collapse, trimming, and case folding. The matcher indexes a caption by
+
+$$
+h_c(o)=\operatorname{SHA256}\!\left(n_c(o)\right).
+$$
+
+Images are matched by a SHA-256 hash of the file bytes obtained after Base64 decoding; optional decoded-pixel hashes can recover visually identical PNGs with different file encodings. The metadata index stores compact identifiers, figure IDs, normalized paper DOIs, reference DOIs, and citing DOIs rather than the large objects themselves. It is saved as `astroclimb_metadata_index.pkl` and reused for train, test, and later notebook runs.
+
+For uniquely matched metadata records \(a\) and \(b\), the rule is evaluated in priority order:
+
+$$
+\rho(a,b)=
+\begin{cases}
+\texttt{same\_figure}, & \operatorname{row}(a)=\operatorname{row}(b),\\
+\texttt{same\_paper}, & d_a=d_b\ne\varnothing,\\
+\texttt{related\_papers}, & d_a\leftrightarrow d_b,\\
+\texttt{unrelated\_papers}, & \text{otherwise},
+\end{cases}
+$$
+
+where \(d_a\leftrightarrow d_b\) means that either DOI occurs in the other paper's reference or citation set. If an object is not found or does not have a unique metadata row, the initial result is `unmatched`. During labeled training matching, a known `same_figure` caption can also bootstrap the exact image-to-record hash mapping; the cached mapping is then available to the test pass.
+
+#### 3. Recover safe ambiguous matches by candidate consensus
+
+An exact caption or image may correspond to several metadata rows. Let \(C_1\) and \(C_2\) be the candidate record sets for the two objects. The notebook evaluates every cross-product pair and removes `unmatched` results:
+
+$$
+R_i=\left\{\rho(a,b):a\in C_1,\ b\in C_2\right\}
+\setminus\{\texttt{unmatched}\}.
+$$
+
+The pair is recovered only when all viable candidate combinations agree, that is, when \(|R_i|=1\). Otherwise it remains unresolved and is reserved for the learned fallback. The audit column `resolution` distinguishes `unique`, `candidate_consensus`, and `unresolved` rows.
+
+#### 4. Cache modality-specific representations
+
+Each raw object is assigned the stable key \(h(o)=\operatorname{SHA256}(o)\). Normalized neural vectors and OCR text are persisted in `representations.sqlite`, so repeated objects and interrupted runs do not require another forward pass. For any encoder \(g\), the stored vector is
+
+$$
+\mathbf{e}(o)=
+\frac{g(o)}{\max\!\left(\lVert g(o)\rVert_2,10^{-8}\right)}.
+$$
+
+The encoders have complementary roles:
+
+- SPECTER2 embeds captions in a scientific-text space.
+- SigLIP2 embeds both captions and figures in a shared text-image space, making it the main signal for mixed pairs.
+- DINOv3, or DINOv2 as fallback, embeds figures in a visual space.
+- EasyOCR extracts figure text for figure-caption and figure-figure comparison.
+
+#### 5. Construct the 22-dimensional pair feature vector
+
+For two normalized embeddings \(\mathbf{u}\) and \(\mathbf{v}\), each neural encoder contributes four summary statistics:
+
+$$
+q(\mathbf{u},\mathbf{v})=
+\left[
+\mathbf{u}^{\top}\mathbf{v},\
+\frac{1}{d}\sum_{j=1}^{d}|u_j-v_j|,\
+\lVert\mathbf{u}-\mathbf{v}\rVert_2,\
+\lVert\mathbf{u}-\mathbf{v}\rVert_\infty
+\right].
+$$
+
+Caption-caption rows also receive word and character TF-IDF cosine similarities. With L2-normalized sparse vectors, each is simply
+
+$$
+s_{\mathrm{TFIDF}}(o_1,o_2)=\mathbf{v}_1^{\top}\mathbf{v}_2.
+$$
+
+Figure-figure rows receive 64-bit perceptual-hash similarity
+
+$$
+s_{\mathrm{pHash}}(o_1,o_2)
+=1-\frac{d_H\!\left(p(o_1),p(o_2)\right)}{64}.
+$$
+
+OCR comparison contributes token Jaccard overlap
+
+$$
+J(A,B)=\frac{|A\cap B|}{\max(|A\cup B|,1)}
+$$
+
+and a character-sequence similarity. Three one-hot modality flags and two clipped raw-object lengths complete the feature vector:
+
+$$
+\mathbf{x}_i=\left[
+q_{\mathrm{SPECTER}},
+q_{\mathrm{SigLIP}},
+q_{\mathrm{DINO}},
+s_{\mathrm{word}},
+s_{\mathrm{char}},
+s_{\mathrm{pHash}},
+J_{\mathrm{OCR}},
+s_{\mathrm{OCR,char}},
+\mathbf{m},
+\ell_1,\ell_2
+\right]\in\mathbb{R}^{22},
+$$
+
+where \(\mathbf{m}\) is one-hot over caption-caption, caption-figure, and figure-figure, and \(\ell_j=\min(|o_j|,5000)/5000\). Features that do not apply to a modality are set to zero. Train and test matrices are cached as compressed `train_features.npz` and `test_features.npz` files.
+
+#### 6. Train three balanced fallback specialists
+
+The notebook trains a separate CatBoost classifier for caption-caption, caption-figure, and figure-figure pairs. This prevents the model from forcing very different similarity regimes into one decision boundary. For class \(k\), balanced training uses
+
+$$
+w_k=\frac{N}{K N_k},
+$$
+
+where \(N\) is the number of rows available to that specialist, \(K\) is the number of classes present, and \(N_k\) is the class count. CatBoost produces class scores \(F_{m,k}(\mathbf{x})\), converted to probabilities by
+
+$$
+p_{m,k}(\mathbf{x})=
+\frac{\exp(F_{m,k}(\mathbf{x}))}
+{\sum_{j\in\mathcal{Y}}\exp(F_{m,j}(\mathbf{x}))}.
+$$
+
+Validation uses `StratifiedGroupKFold`. The group key is the ordered DOI pair `obj_1_doi|obj_2_doi`; unmatched rows receive unique row groups. Thus the same known paper pair cannot be split between a fold's training and validation partitions. Out-of-fold predictions evaluate both the fallback by itself and the complete metadata-first override.
+
+The selection metric is macro-F1:
+
+$$
+F_1^{\mathrm{macro}}=\frac{1}{4}\sum_{k=1}^{4}
+\frac{2P_kR_k}{P_k+R_k}.
+$$
+
+After validation, one 800-iteration specialist per modality is refitted on all corresponding training rows and saved to `specialist_models.joblib`.
+
+#### 7. Run hybrid inference and verify the submission
+
+For every test row, the relevant specialist supplies a fallback distribution. If exact matching or candidate consensus produced a valid metadata relationship, that rule replaces the fallback label; otherwise the highest-probability fallback class is used. Predictions are converted to one-hot columns, merged onto `sample_submission.csv` by `id`, and checked for missing values and exactly one active class per row.
+
+The main outputs under `/kaggle/working/astroclimb_hybrid` (or local `results/astroclimb_hybrid`) are:
+
+| Artifact | Purpose |
+| --- | --- |
+| `submission_hybrid.csv` | Kaggle-ready one-hot predictions |
+| `prediction_audit.csv` | Metadata rule, resolution type, fallback label, and final label per test row |
+| `train_metadata_graph.csv`, `test_metadata_graph.csv` | Exact and candidate-consensus metadata results |
+| `representations.sqlite` | Reusable neural-vector and OCR cache |
+| `tfidf.joblib` | Fitted word and character TF-IDF models |
+| `train_features.npz`, `test_features.npz` | Cached 22-column feature matrices |
+| `specialist_models.joblib` | Final modality-specific CatBoost models |
+
+Run the notebook from top to bottom on the first execution. Later runs reuse existing artifacts. If the source CSVs, feature definition, encoder, OCR setting, or model configuration changes, remove only the corresponding stale cache files before rerunning; the notebook does not fingerprint configuration changes automatically. The resulting `submission_hybrid.csv` received a Kaggle score of **0.48279**.
 
 ## Suggested approach
 
