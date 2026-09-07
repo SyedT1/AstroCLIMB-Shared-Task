@@ -89,8 +89,9 @@ The experiment notebooks are kept in the [`notebooks/`](notebooks/) directory.
 | [`astroclimb_kaggle_starter.ipynb`](notebooks/astroclimb_kaggle_starter.ipynb) | CLIP pair features + balanced logistic regression | **0.39283** |
 | [`astroclimb_kaggle_improved.ipynb`](notebooks/astroclimb_kaggle_improved.ipynb) | Cached CLIP, pHash, TF-IDF, grouped OOF validation, threshold tuning, and nonlinear model comparison | **0.44505** |
 | [`metadata-first-hybrid-training.ipynb`](notebooks/metadata-first-hybrid-training.ipynb) | Metadata-first DOI/citation-graph resolution with candidate consensus and modality-specific CatBoost fallbacks using SPECTER2, SigLIP2, DINO, TF-IDF, OCR, and pHash features | **0.48279** |
+| [`metadata-first-unified-multimodal.ipynb`](notebooks/metadata-first-unified-multimodal.ipynb) | Unified early-fusion neural network using the multimodal feature set | Not scored |
 
-The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the starter score from 0.39283 to 0.44505, and the metadata-first hybrid raises it to 0.48279.
+The reported values are the scores rendered by Kaggle for the submissions produced by the corresponding notebooks. The competition evaluates submissions with macro-averaged F1, as described above. The improved notebook raises the starter score from 0.39283 to 0.44505. The **0.48279** result belongs specifically to the modality-specific **CatBoost** models in `metadata-first-hybrid-training.ipynb`; it is not a score for the unified multimodal neural notebook.
 
 ### Starter notebook working procedure
 

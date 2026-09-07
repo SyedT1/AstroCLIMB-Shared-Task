@@ -1,2 +1,10 @@
 experiments.txt
+
+# Generated Python bytecode
+__pycache__/
+*.py[cod]
+
+# Large local model/feature artifacts; keep these in the Kaggle dataset,
+# not in Git (representations.sqlite exceeds GitHub's 100 MB limit).
+predictions/archive/
 data/
