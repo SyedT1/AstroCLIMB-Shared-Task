@@ -1,0 +1,101 @@
+{
+  "coverage": {
+    "image": 90450,
+    "siglip_text": 90450,
+    "specter_text": 90450
+  },
+  "dimensions": {
+    "dino": 384,
+    "siglip": 768,
+    "specter": 768
+  },
+  "files": {
+    "dino_image_f16.npy": {
+      "bytes": 72371072,
+      "dtype": "float16",
+      "shape": [
+        94233,
+        384
+      ]
+    },
+    "image_done.npy": {
+      "bytes": 94361,
+      "dtype": "uint8",
+      "shape": [
+        94233
+      ]
+    },
+    "phash_u64.npy": {
+      "bytes": 753992,
+      "dtype": "uint64",
+      "shape": [
+        94233
+      ]
+    },
+    "siglip_image_f16.npy": {
+      "bytes": 144742016,
+      "dtype": "float16",
+      "shape": [
+        94233,
+        768
+      ]
+    },
+    "siglip_text_done.npy": {
+      "bytes": 94361,
+      "dtype": "uint8",
+      "shape": [
+        94233
+      ]
+    },
+    "siglip_text_f16.npy": {
+      "bytes": 144742016,
+      "dtype": "float16",
+      "shape": [
+        94233,
+        768
+      ]
+    },
+    "specter_text_done.npy": {
+      "bytes": 94361,
+      "dtype": "uint8",
+      "shape": [
+        94233
+      ]
+    },
+    "specter_text_f16.npy": {
+      "bytes": 144742016,
+      "dtype": "float16",
+      "shape": [
+        94233,
+        768
+      ]
+    },
+    "target_mask.npy": {
+      "bytes": 94361,
+      "dtype": "bool",
+      "shape": [
+        94233
+      ]
+    }
+  },
+  "metadata_rows": 94233,
+  "models": {
+    "dino": "facebook/dinov2-small",
+    "siglip": "google/siglip2-base-patch16-naflex",
+    "specter": "allenai/specter2_base"
+  },
+  "source": {
+    "hf_dataset": "adsabs/AstroCLIMB",
+    "hf_split": "train",
+    "metadata_index": "/kaggle/input/datasets/syedmohaiminulhoque/astroclimb-01/astroclimb_01/metadata_index.pkl",
+    "train_manifest": "/kaggle/input/datasets/syedmohaiminulhoque/astroclimb-02/astroclimb_02/hf_train_multimodal_pairs.csv",
+    "train_manifest_sha256": "3bc1a85fcbc61fbe7085ed1f7d1748e3091eeb82b24d926d6f1bdf7b85bf83a4",
+    "validation_manifest": "/kaggle/input/datasets/syedmohaiminulhoque/astroclimb-02/astroclimb_02/hf_validation_multimodal_pairs.csv",
+    "validation_manifest_sha256": "2744cea877a6d3ea8a9e18ace28465c178df079b3a8d0dca908e1fcc80f32647"
+  },
+  "storage_dtype": "float16",
+  "target_rows": 90450,
+  "target_rows_sha256": "163c28d6bcf4f208639c324626e412142f6013ab7b4e3c0544ef5abed0c6e0de",
+  "train_target_rows": 72196,
+  "validation_target_rows": 18254
+}

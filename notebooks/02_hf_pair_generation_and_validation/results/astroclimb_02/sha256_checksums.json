@@ -1,0 +1,6 @@
+{
+  "hf_doi_split.csv": "bceb8ee7892211c3175be9e6e91e9ad23a552344e23cd82fa3917d3c9eba7443",
+  "hf_train_multimodal_pairs.csv": "3bc1a85fcbc61fbe7085ed1f7d1748e3091eeb82b24d926d6f1bdf7b85bf83a4",
+  "hf_validation_multimodal_pairs.csv": "2744cea877a6d3ea8a9e18ace28465c178df079b3a8d0dca908e1fcc80f32647",
+  "pair_generation_summary.json": "c0d71f86acb9f20c431056392dfc2226138dbb56037f4b3c1fa96bc65e86d36f"
+}

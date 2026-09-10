@@ -1,0 +1,73 @@
+{
+  "configuration": {
+    "hard_negative_fraction": 0.5,
+    "max_related_pairs_per_edge": 40,
+    "max_same_paper_pairs_per_doi": 60,
+    "max_unrelated_pairs_per_doi_pair": 12,
+    "seed": 2026,
+    "smoke_test": false,
+    "train_pairs_per_cell": 16000,
+    "validation_fraction": 0.2,
+    "validation_pairs_per_cell": 4000
+  },
+  "source": {
+    "citation_edges": 27003,
+    "eligible_records": 94233,
+    "hf_dataset": "adsabs/AstroCLIMB",
+    "hf_split": "train",
+    "metadata_index_path": "/kaggle/input/datasets/syedmohaiminulhoque/astroclimb-01/astroclimb_01/metadata_index.pkl",
+    "paper_dois": 10000
+  },
+  "train": {
+    "cell_counts": {
+      "related_papers|image-image": 16000,
+      "related_papers|text-image": 16000,
+      "related_papers|text-text": 16000,
+      "same_figure|text-image": 16000,
+      "same_paper|image-image": 16000,
+      "same_paper|text-image": 16000,
+      "same_paper|text-text": 16000,
+      "unrelated_papers|image-image": 16000,
+      "unrelated_papers|text-image": 16000,
+      "unrelated_papers|text-text": 16000
+    },
+    "internal_edges": 17239,
+    "papers": 8000,
+    "records": 75120,
+    "rows": 160000,
+    "sampling_counts": {
+      "citation_edge": 48000,
+      "exact_alignment": 16000,
+      "random_nonedge": 24000,
+      "same_doi": 48000,
+      "shared_caption_token": 24000
+    },
+    "unique_source_rows_used": 72196
+  },
+  "validation": {
+    "cell_counts": {
+      "related_papers|image-image": 4000,
+      "related_papers|text-image": 4000,
+      "related_papers|text-text": 4000,
+      "same_figure|text-image": 4000,
+      "same_paper|image-image": 4000,
+      "same_paper|text-image": 4000,
+      "same_paper|text-text": 4000,
+      "unrelated_papers|image-image": 4000,
+      "unrelated_papers|text-image": 4000,
+      "unrelated_papers|text-text": 4000
+    },
+    "internal_edges": 1107,
+    "papers": 2000,
+    "records": 19113,
+    "rows": 40000,
+    "sampling_counts": {
+      "citation_edge": 12000,
+      "exact_alignment": 4000,
+      "random_nonedge": 6000,
+      "same_doi": 12000,
+      "shared_caption_token": 6000
+    },
+    "unique_source_rows_used": 18254
+  }
+}

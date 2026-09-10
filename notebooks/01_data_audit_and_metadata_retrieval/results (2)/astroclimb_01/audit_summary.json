@@ -1,0 +1,96 @@
+{
+  "configuration": {
+    "fuzzy_captions": true,
+    "fuzzy_min_margin": 2.0,
+    "fuzzy_min_score": 98.5,
+    "hf_dataset": "adsabs/AstroCLIMB",
+    "hf_split": "train",
+    "metadata_path": "None",
+    "pixel_hashes": false
+  },
+  "data_audit": {
+    "test_modalities": {
+      "image-image": 3000,
+      "text-image": 4000,
+      "text-text": 3000
+    },
+    "test_rows": 10000,
+    "train_classes": {
+      "related_papers": 3000,
+      "same_figure": 1000,
+      "same_paper": 3000,
+      "unrelated_papers": 3000
+    },
+    "train_modalities": {
+      "image-image": 3000,
+      "text-image": 4000,
+      "text-text": 3000
+    },
+    "train_rows": 10000
+  },
+  "test_retrieval": {
+    "coverage": 0.0,
+    "coverage_by_modality": {
+      "image-image": 0.0,
+      "text-image": 0.0,
+      "text-text": 0.0
+    },
+    "obj_1_methods": {
+      "caption_exact": 3,
+      "caption_unmatched": 6997,
+      "image_unmatched": 3000
+    },
+    "obj_2_methods": {
+      "caption_fuzzy_high_confidence": 1,
+      "caption_unmatched": 2999,
+      "image_unmatched": 7000
+    },
+    "relationship_counts": {
+      "unmatched": 10000
+    },
+    "resolution_counts": {
+      "unresolved": 10000
+    },
+    "resolved": 0,
+    "rows": 10000
+  },
+  "train_retrieval": {
+    "accuracy_by_resolution": {
+      "candidate_consensus": 1.0,
+      "unique": 1.0
+    },
+    "accuracy_when_resolved": 1.0,
+    "coverage": 0.997,
+    "coverage_by_modality": {
+      "image-image": 1.0,
+      "text-image": 0.994,
+      "text-text": 0.998
+    },
+    "obj_1_methods": {
+      "caption_exact": 6897,
+      "caption_exact_ambiguous": 103,
+      "image_raw_ambiguous": 10,
+      "image_raw_exact": 2990
+    },
+    "obj_2_methods": {
+      "caption_exact": 2961,
+      "caption_exact_ambiguous": 39,
+      "image_raw_ambiguous": 40,
+      "image_raw_exact": 6960
+    },
+    "relationship_counts": {
+      "related_papers": 2996,
+      "same_figure": 978,
+      "same_paper": 2996,
+      "unmatched": 30,
+      "unrelated_papers": 3000
+    },
+    "resolution_counts": {
+      "ambiguous_disagreement": 30,
+      "candidate_consensus": 144,
+      "unique": 9826
+    },
+    "resolved": 9970,
+    "rows": 10000
+  }
+}

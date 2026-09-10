@@ -1,0 +1,192 @@
+{
+  "configuration": {
+    "specialist": false,
+    "synthetic": 0
+  },
+  "feature_variant": "20 frozen scalar features; OCR deferred because notebook 03 does not cache OCR",
+  "final_fit_and_test_inference_seconds": 4.555641723000008,
+  "hf_unseen_paper": {
+    "by_modality": {
+      "image-image": 0.42031882609692833,
+      "text-image": 0.230627155275785,
+      "text-text": 0.5636221368334519
+    },
+    "cell_f1": {
+      "related_papers|image-image": 0.3557889344262295,
+      "related_papers|text-image": 0.14233081248788054,
+      "related_papers|text-text": 0.4341456918364629,
+      "same_figure|text-image": 0.4526989253990931,
+      "same_paper|image-image": 0.47141094199917727,
+      "same_paper|text-image": 0.10645933014354067,
+      "same_paper|text-text": 0.6700220967345937,
+      "unrelated_papers|image-image": 0.4337566018653781,
+      "unrelated_papers|text-image": 0.2210195530726257,
+      "unrelated_papers|text-text": 0.586698621929299
+    },
+    "confusion_matrix": [
+      [
+        3644,
+        145,
+        101,
+        110
+      ],
+      [
+        3046,
+        4715,
+        2145,
+        2094
+      ],
+      [
+        2761,
+        2096,
+        3386,
+        3757
+      ],
+      [
+        2648,
+        1499,
+        2842,
+        5011
+      ]
+    ],
+    "macro_f1": 0.42018552751774657,
+    "per_class": {
+      "accuracy": 0.4189,
+      "macro avg": {
+        "f1-score": 0.42018552751774657,
+        "precision": 0.42878081533787227,
+        "recall": 0.5009166666666667,
+        "support": 40000.0
+      },
+      "related_papers": {
+        "f1-score": 0.3307609651265019,
+        "precision": 0.3995751711116356,
+        "recall": 0.2821666666666667,
+        "support": 12000.0
+      },
+      "same_figure": {
+        "f1-score": 0.4526989253990931,
+        "precision": 0.30118191586081494,
+        "recall": 0.911,
+        "support": 4000.0
+      },
+      "same_paper": {
+        "f1-score": 0.4610119775116108,
+        "precision": 0.5576581904198699,
+        "recall": 0.3929166666666667,
+        "support": 12000.0
+      },
+      "unrelated_papers": {
+        "f1-score": 0.43627024203378023,
+        "precision": 0.4567079839591688,
+        "recall": 0.4175833333333333,
+        "support": 12000.0
+      },
+      "weighted avg": {
+        "f1-score": 0.41368284794147714,
+        "precision": 0.4543005952332838,
+        "recall": 0.4189,
+        "support": 40000.0
+      }
+    },
+    "prediction_distribution": {
+      "related_papers": 8474,
+      "same_figure": 12099,
+      "same_paper": 8455,
+      "unrelated_papers": 10972
+    }
+  },
+  "kaggle_grouped_oof": {
+    "by_modality": {
+      "image-image": 0.4277310036221856,
+      "text-image": 0.19790811837842057,
+      "text-text": 0.599761810220398
+    },
+    "cell_f1": {
+      "related_papers|image-image": 0.34471544715447155,
+      "related_papers|text-image": 0.08602150537634409,
+      "related_papers|text-text": 0.4303388918773534,
+      "same_figure|text-image": 0.41551642075202283,
+      "same_paper|image-image": 0.4776761699838623,
+      "same_paper|text-image": 0.062122519413287315,
+      "same_paper|text-text": 0.6952526799387443,
+      "unrelated_papers|image-image": 0.460801393728223,
+      "unrelated_papers|text-image": 0.22797202797202798,
+      "unrelated_papers|text-text": 0.6736938588450962
+    },
+    "confusion_matrix": [
+      [
+        873,
+        32,
+        36,
+        59
+      ],
+      [
+        815,
+        1161,
+        502,
+        522
+      ],
+      [
+        790,
+        540,
+        770,
+        900
+      ],
+      [
+        724,
+        244,
+        605,
+        1427
+      ]
+    ],
+    "macro_f1": 0.4196476081177898,
+    "per_class": {
+      "accuracy": 0.4231,
+      "macro avg": {
+        "f1-score": 0.4196476081177898,
+        "precision": 0.4382799822782803,
+        "recall": 0.4980833333333333,
+        "support": 10000.0
+      },
+      "related_papers": {
+        "f1-score": 0.31345410136372887,
+        "precision": 0.40250914793518033,
+        "recall": 0.25666666666666665,
+        "support": 3000.0
+      },
+      "same_figure": {
+        "f1-score": 0.41551642075202283,
+        "precision": 0.2726420986883198,
+        "recall": 0.873,
+        "support": 1000.0
+      },
+      "same_paper": {
+        "f1-score": 0.4665461121157324,
+        "precision": 0.5872534142640364,
+        "recall": 0.387,
+        "support": 3000.0
+      },
+      "unrelated_papers": {
+        "f1-score": 0.483073798239675,
+        "precision": 0.4907152682255846,
+        "recall": 0.4756666666666667,
+        "support": 3000.0
+      },
+      "weighted avg": {
+        "f1-score": 0.42047384559094314,
+        "precision": 0.4714075589962724,
+        "recall": 0.4231,
+        "support": 10000.0
+      }
+    },
+    "prediction_distribution": {
+      "related_papers": 1913,
+      "same_figure": 3202,
+      "same_paper": 1977,
+      "unrelated_papers": 2908
+    }
+  },
+  "validation_time_seconds": 29.56775539599994,
+  "wall_time_seconds": 34.17233265200002
+}

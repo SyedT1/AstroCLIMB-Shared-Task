@@ -1,0 +1,7 @@
+{
+  "best_hf_unseen_paper": "E06",
+  "best_kaggle_grouped_oof": "E06",
+  "e06_minus_e04_hf": 0.029798743218549195,
+  "e06_minus_e04_kaggle": 0.012438973890016025,
+  "next_action": "PROCEED_TO_E08"
+}
